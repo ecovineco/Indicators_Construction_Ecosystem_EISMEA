@@ -1,6 +1,6 @@
 # Construction Ecosystem Data Pipeline
 
-Extracts Eurostat data, applies construction-sector weights, and produces clean Excel outputs.
+Extracts statistical data from multiple sources (Eurostat and future integrations), applies construction-sector weights, and produces clean Excel outputs.
 
 ## Architecture
 
