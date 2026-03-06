@@ -30,7 +30,7 @@ from .reshape import reshape_to_wide
 # ---------------------------------------------------------------------------
 # Registry: dataset name → extractor class
 #
-# The dictionary key (e.g. "employment_by_sex") is the dataset's unique
+# The dictionary key is the dataset's unique
 # identifier throughout the pipeline and becomes the Excel sheet name.
 # ---------------------------------------------------------------------------
 
