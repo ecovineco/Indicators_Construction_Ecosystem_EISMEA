@@ -33,14 +33,23 @@ from config.nace_codes import ALL_NACE_CODES, F_SUB_CODES
 # Column-name constants
 # ---------------------------------------------------------------------------
 
-NACE_COLUMN_PREFIX = "Value for NACE code"
+NACE_COLUMN_PREFIX = "Weighted value for NACE code"
 """Prefix used for every NACE value column in the wide format."""
+
+UNWEIGHTED_COLUMN_PREFIX = "Unweighted value for NACE code"
+"""Prefix used for every unweighted NACE value column in the wide format."""
 
 F_AGGREGATED_COLUMN_NAME = f"{NACE_COLUMN_PREFIX} F(F41,F42,F43)"
 """Column name for the consolidated F code (sum of F41 + F42 + F43)."""
 
-TOTAL_VALUE_COLUMN = "Total Value"
-"""Column holding the row-wise sum of all non-NaN NACE value columns."""
+F_UNWEIGHTED_COLUMN_NAME = f"{UNWEIGHTED_COLUMN_PREFIX} F(F41,F42,F43)"
+"""Column name for the unweighted consolidated F code."""
+
+TOTAL_VALUE_COLUMN = "Total Weighted Value"
+"""Column holding the row-wise sum of all non-NaN weighted NACE value columns."""
+
+TOTAL_UNWEIGHTED_COLUMN = "Total Unweighted Value"
+"""Column holding the row-wise sum of all non-NaN unweighted NACE value columns."""
 
 UNIT_COLUMN = "Unit"
 """Column holding the measurement unit string."""
@@ -53,7 +62,7 @@ _WIDE_FORMAT_NACE_CODES = sorted(ALL_NACE_CODES)
 
 
 def _nace_column_name(nace_code: str) -> str:
-    """Return the wide-format column name for a NACE code.
+    """Return the wide-format weighted column name for a NACE code.
 
     Args:
         nace_code: A NACE code (e.g. ``"C25"``, ``"F"``).
@@ -67,11 +76,31 @@ def _nace_column_name(nace_code: str) -> str:
     return f"{NACE_COLUMN_PREFIX} {nace_code}"
 
 
+def _unweighted_column_name(nace_code: str) -> str:
+    """Return the wide-format unweighted column name for a NACE code.
+
+    Args:
+        nace_code: A NACE code (e.g. ``"C25"``, ``"F"``).
+
+    Returns:
+        Column name string, e.g. ``"Unweighted value for NACE code C25"``
+        or ``"Unweighted value for NACE code F(F41,F42,F43)"``.
+    """
+    if nace_code == "F":
+        return F_UNWEIGHTED_COLUMN_NAME
+    return f"{UNWEIGHTED_COLUMN_PREFIX} {nace_code}"
+
+
 # Pre-compute the ordered list of NACE value column names
 ORDERED_NACE_VALUE_COLUMNS = [
     _nace_column_name(code) for code in _WIDE_FORMAT_NACE_CODES
 ]
-"""NACE value columns in the canonical display order."""
+"""Weighted NACE value columns in the canonical display order."""
+
+ORDERED_UNWEIGHTED_COLUMNS = [
+    _unweighted_column_name(code) for code in _WIDE_FORMAT_NACE_CODES
+]
+"""Unweighted NACE value columns in the canonical display order."""
 
 
 # ---------------------------------------------------------------------------
@@ -82,11 +111,12 @@ def reshape_to_wide(
     df: pd.DataFrame,
     extra_id_columns: list[str] | None = None,
     unit: str = "",
+    unweighted_df: pd.DataFrame | None = None,
 ) -> pd.DataFrame:
     """Reshape a long-format extraction DataFrame into wide format.
 
     Args:
-        df: Long-format DataFrame with columns ``Country Code``,
+        df: Long-format weighted DataFrame with columns ``Country Code``,
             ``Country Name``, ``Year``, ``NACE Code``, ``Value``,
             and any extra dimension columns.
         extra_id_columns: Names of additional dimension columns
@@ -95,12 +125,15 @@ def reshape_to_wide(
             the pivot.
         unit: Measurement unit string placed in the ``Unit`` column
             (e.g. ``"Persons"``).
+        unweighted_df: Optional long-format DataFrame with the original
+            unweighted values.  When provided, each weighted NACE column
+            is followed by its unweighted counterpart in the output.
 
     Returns:
         Wide-format DataFrame with columns:
         ``Country Code``, ``Country Name``, ``Year``,
-        ``[extra dims]``, one ``Value for NACE code …`` column per
-        NACE code, ``Total Value``, ``Unit``.
+        ``[extra dims]``, interleaved weighted / unweighted NACE
+        columns, ``Total Value``, ``Total Unweighted Value``, ``Unit``.
     """
     df = df.copy()
     id_cols = BASE_ID_COLUMNS + (extra_id_columns or [])
@@ -108,35 +141,71 @@ def reshape_to_wide(
     # -- Step 1: Consolidate F41/F42/F43 into a single "F" row ------------
     df = _consolidate_f_codes(df, id_cols)
 
-    # -- Step 2: Pivot NACE Code → columns ---------------------------------
+    # -- Step 2: Pivot weighted NACE Code → columns ------------------------
     wide = df.pivot_table(
         index=id_cols,
         columns="NACE Code",
         values="Value",
         aggfunc="sum",
     )
-
-    # Flatten the column index and reset
     wide.columns = [_nace_column_name(c) for c in wide.columns]
     wide = wide.reset_index()
+
+    # -- Step 2b: Pivot unweighted values if provided ----------------------
+    if unweighted_df is not None:
+        uw = unweighted_df.copy()
+        uw = _consolidate_f_codes(uw, id_cols)
+        uw_wide = uw.pivot_table(
+            index=id_cols,
+            columns="NACE Code",
+            values="Value",
+            aggfunc="sum",
+        )
+        uw_wide.columns = [_unweighted_column_name(c) for c in uw_wide.columns]
+        uw_wide = uw_wide.reset_index()
+        wide = wide.merge(uw_wide, on=id_cols, how="left")
 
     # -- Step 3: Ensure all expected NACE columns exist --------------------
     for col_name in ORDERED_NACE_VALUE_COLUMNS:
         if col_name not in wide.columns:
             wide[col_name] = float("nan")
+    if unweighted_df is not None:
+        for col_name in ORDERED_UNWEIGHTED_COLUMNS:
+            if col_name not in wide.columns:
+                wide[col_name] = float("nan")
 
-    # -- Step 4: Calculate Total Value (sum of non-NaN NACE columns) -------
+    # -- Step 4: Calculate Total Values ------------------------------------
     nace_cols_present = [c for c in ORDERED_NACE_VALUE_COLUMNS if c in wide.columns]
     wide[TOTAL_VALUE_COLUMN] = wide[nace_cols_present].sum(axis=1, min_count=1)
+
+    if unweighted_df is not None:
+        uw_cols_present = [c for c in ORDERED_UNWEIGHTED_COLUMNS if c in wide.columns]
+        wide[TOTAL_UNWEIGHTED_COLUMN] = wide[uw_cols_present].sum(
+            axis=1, min_count=1
+        )
 
     # -- Step 5: Add Unit column -------------------------------------------
     wide[UNIT_COLUMN] = unit
 
     # -- Step 6: Order columns canonically ---------------------------------
+    # Interleave weighted and unweighted columns per NACE code
+    nace_columns_ordered: list[str] = []
+    for weighted_col, unweighted_col in zip(
+        ORDERED_NACE_VALUE_COLUMNS, ORDERED_UNWEIGHTED_COLUMNS
+    ):
+        nace_columns_ordered.append(weighted_col)
+        if unweighted_df is not None:
+            nace_columns_ordered.append(unweighted_col)
+
+    total_columns = [TOTAL_VALUE_COLUMN]
+    if unweighted_df is not None:
+        total_columns.append(TOTAL_UNWEIGHTED_COLUMN)
+
     final_columns = (
         id_cols
-        + ORDERED_NACE_VALUE_COLUMNS
-        + [TOTAL_VALUE_COLUMN, UNIT_COLUMN]
+        + nace_columns_ordered
+        + total_columns
+        + [UNIT_COLUMN]
     )
     # Only keep columns that actually exist
     final_columns = [c for c in final_columns if c in wide.columns]

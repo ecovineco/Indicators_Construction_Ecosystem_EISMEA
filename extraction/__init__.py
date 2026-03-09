@@ -84,11 +84,12 @@ def run_all_extractions(output_path: str) -> dict[str, pd.DataFrame]:
         weighted_long = apply_weights(raw_long, extractor.weight_data_type)
         print(f"  Weights applied (data_type={extractor.weight_data_type})")
 
-        # Step 3: Reshape to wide format
+        # Step 3: Reshape to wide format (include unweighted values)
         wide = reshape_to_wide(
             weighted_long,
             extra_id_columns=extractor.extra_id_columns,
             unit=extractor.unit,
+            unweighted_df=raw_long,
         )
         print(f"  Reshaped: {len(wide)} rows x {len(wide.columns)} columns")
 
