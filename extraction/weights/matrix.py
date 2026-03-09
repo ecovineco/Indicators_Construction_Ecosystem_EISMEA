@@ -27,11 +27,11 @@ Data-type keys and their corresponding Excel sheet names:
     ==================  ====================
     Internal key        Sheet name
     ==================  ====================
-    value_added         Value Added
     turnover            Turnover
     persons_employed    Persons Employed
     employees_fte       Employees in FTEs
     enterprises         Enterprises
+    other               Other
     ==================  ====================
 
 Backward-compatible aliases:
@@ -60,11 +60,11 @@ from .loader import (
 # ---------------------------------------------------------------------------
 
 DATA_TYPE_TO_SHEET_NAME: dict[str, str] = {
-    "value_added": "Value Added",
     "turnover": "Turnover",
     "persons_employed": "Persons Employed",
     "employees_fte": "Employees in FTEs",
     "enterprises": "Enterprises",
+    "other": "Other",
 }
 """Maps each internal data-type key to a human-readable Excel sheet name."""
 
@@ -75,6 +75,7 @@ SHEET_NAME_TO_DATA_TYPE: dict[str, str] = {
 
 _DATA_TYPE_ALIASES: dict[str, str] = {
     "employment": "persons_employed",
+    "value_added": "turnover",
 }
 """Aliases for backward compatibility with existing processor code.
 

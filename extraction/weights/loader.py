@@ -63,7 +63,6 @@ SOURCE_COL_HORIZONTAL_NACE = "Horizontal NACE code"
 # ---------------------------------------------------------------------------
 
 WEIGHT_COLUMN_TO_DATA_TYPE = {
-    "Value added weight": "value_added",
     "Turnover weight": "turnover",
     "Persons employed weight": "persons_employed",
     "Employees in FTEs weight": "employees_fte",
@@ -171,7 +170,7 @@ def load_weights_from_csv(csv_path: str) -> dict[str, pd.DataFrame]:
     Returns:
         Dictionary mapping internal data-type keys to DataFrames.
 
-        Keys: ``"value_added"``, ``"turnover"``, ``"persons_employed"``,
+        Keys: ``"turnover"``, ``"persons_employed"``,
         ``"employees_fte"``, ``"enterprises"``.
 
         Each DataFrame has the columns defined in
