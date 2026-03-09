@@ -1,0 +1,150 @@
+================================================================================
+PROMPT: Implement New Eurostat Dataset Extractors
+================================================================================
+
+TASK OVERVIEW
+-------------
+I will provide you with a list of Eurostat datasets to extract. For each one,
+you must create a new extractor file in the `extraction/` folder, following
+the exact same pattern as `extraction/employment_by_sex.py`.
+
+Each extractor is a single Python file containing one class that inherits from
+`BaseExtractor` (defined in `extraction/base.py`). The pipeline (extract ->
+weight -> reshape -> save) is already built; you just need to write the
+extractor class.
+
+
+WHAT I WILL PROVIDE FOR EACH DATASET
+-------------------------------------
+For each dataset I will give you:
+  1. The value/indicator being extracted (e.g. "turnover", "number of enterprises")
+  2. The Eurostat dataset code (e.g. "sbs_na_ind_r2")
+  3. Which properties/dimensions to include in the extraction beyond the
+     standard ones (e.g. "by sex", "by size class")
+
+The properties I do NOT need to mention (you must always include them):
+  - Year (time dimension) — always included
+  - Country (geo code + name) — always included
+  - NACE codes — always included, use `API_NACE_CODES` from `config/nace_codes.py`
+
+
+HOW TO IMPLEMENT EACH EXTRACTOR
+--------------------------------
+Use `extraction/employment_by_sex.py` as the reference template. For each
+dataset:
+
+1. CREATE A NEW FILE in `extraction/` named descriptively (e.g.
+   `turnover.py`, `enterprises_by_size.py`).
+
+2. WRITE THE EXTRACTOR CLASS with these class attributes:
+   - `dataset_label`: Human-readable name (max 31 chars — this becomes the
+     Excel sheet name)
+   - `weight_data_type`: Which weight category applies to this dataset.
+     Must be one of:
+       - "turnover"          (for Turnover data)
+       - "persons_employed"  (for Persons Employed data)
+       - "employees_fte"     (for Employees in FTEs data)
+       - "enterprises"       (for Enterprises data)
+       - "other"             (for Other data)
+   - `unit`: The unit of measurement (e.g. "Persons", "EUR million")
+   - `extra_id_columns`: List of additional dimension columns beyond
+     Country Code, Country Name, Year (e.g. `["Sex"]`, `["Size Class"]`).
+     If there are no extra dimensions, use `[]`.
+
+3. IMPLEMENT THE `extract()` METHOD:
+   - Call `fetch_eurostat()` with the correct dataset code and parameters
+   - Map raw columns to the standard output format:
+     Country Code, Country Name, Year, [extra dims], NACE Code, Value
+   - Apply any unit conversions (e.g. thousands -> full persons)
+   - Sort and return the DataFrame
+
+4. ADD A DETAILED MODULE DOCSTRING at the top of each file explaining:
+   - What data is being extracted
+   - The Eurostat dataset code
+   - The source unit and any conversions applied
+   - The weight data type used
+
+5. VERIFY the Eurostat API parameter codes (field names and values) by
+   checking the Eurostat website for that dataset. The codes I provide
+   should be correct, but double-check.
+
+
+AFTER IMPLEMENTING ALL EXTRACTORS
+----------------------------------
+Update `extraction/__init__.py`:
+  - Import each new extractor class
+  - Add each one to the `EXTRACTORS` dictionary:
+    ```python
+    EXTRACTORS = {
+        "employment_by_sex":  EmploymentBySexExtractor,
+        # ... etc
+    }
+    ```
+  The dictionary key is the dataset identifier (snake_case, matches filename).
+
+
+HANDLING EXTRA DIMENSIONS (MULTIPLE ROWS PER PROPERTY)
+------------------------------------------------------
+When a dataset breaks down by a property (e.g. sex: Male/Female), there will
+be one row per value of that property for each (country, year, NACE code)
+combination. In that case, ALWAYS also include a "Total" value that sums
+across all entries in that dimension. For example, for sex: include "Males",
+"Females", and "Total".
+
+
+CODING STANDARDS
+----------------
+- Google-style docstrings on all classes and public methods
+- Clear, descriptive variable and constant names
+- No unnecessary complexity — keep it simple
+- Follow the exact same structure as `employment_by_sex.py`
+
+
+================================================================================
+DATASETS TO IMPLEMENT
+================================================================================
+Description: Internet access by NACE Rev. 2 activity and NUTS 2 region (isoc_r_ci_in_en2) (more than 10% of the employees, more than 50% of the employees)
+Technical info dataset: "unit" [PC_ENT] Percentage of enterprises in EUrostat dataset isoc_r_ci_cm_pn2 in function of the entries in "indic_is"
+
+
+
+Description: Artificial intelligence by NACE Rev. 2 activity and NUTS 2 region (don’t use, use 1 technology, 2 technologies, 3 technologies)
+Technical info dataset: "unit" [PC_ENT]  Percentage of enterprises in Eurostat dataset isoc_r_eb_ain2 in function of the entries [E_AI_TANY],[E_AI_TX],[E_AI_TGE2],[E_AI_TGE3]
+
+
+
+Description: Data analytics by NACE Rev. 2 activity and NUTS 2 region (Enterprises where data analytics for the enterprise is performed by own employees)  
+Technical info dataset: "unit "[PC_ENT] Percentage of enterprises in Eurostat dataset isoc_eb_dan2
+
+
+
+Description: Innovation active enterprises' expenditure on R&D and innovation by type, NACE Rev. 2 activity and size class (CIS2022) 
+Technical info dataset: "unit" [THS_EUR]Thousand euro from eurostat dataset inn_cis13_exp in function of entries in  "sizeclas" size classes
+
+
+
+Description: Innovation active enterprises' expenditure on R&D and innovation by type, NACE Rev. 2 activity and size class (CIS2022) 
+Technical info dataset: "unit"[PC_EXP] Percentage of total expenditure from eurostat dataset inn_cis13_exp in function of entries in  "sizeclas" size classes
+
+
+
+
+
+
+
+
+
+
+[INSERT YOUR DATASET LIST HERE — for each dataset provide:]
+[1. Description / indicator name]
+[2. Eurostat dataset code]
+[3. Extra dimensions/properties to include]
+[4. Unit of the source data and any conversion needed]
+[5. Which weight_data_type to use]
+
+Example entry:
+  - Turnover by NACE activity
+  - Dataset: "sbs_na_ind_r2"
+  - No extra dimensions (just country, year, NACE)
+  - Unit: EUR million
+  - weight_data_type: "turnover"

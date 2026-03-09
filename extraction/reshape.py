@@ -165,21 +165,41 @@ def reshape_to_wide(
         uw_wide = uw_wide.reset_index()
         wide = wide.merge(uw_wide, on=id_cols, how="left")
 
-    # -- Step 3: Ensure all expected NACE columns exist --------------------
-    for col_name in ORDERED_NACE_VALUE_COLUMNS:
+    # -- Step 3: Build ordered NACE column lists ----------------------------
+    # Detect which NACE codes are actually present in the pivoted data.
+    # Some datasets use 1-letter codes (C, E, F, M, N) instead of 2-digit.
+    actual_weighted_cols = [
+        c for c in wide.columns if c.startswith(NACE_COLUMN_PREFIX)
+    ]
+    actual_nace_codes = sorted(set(
+        c.replace(NACE_COLUMN_PREFIX + " ", "")
+        .replace("F(F41,F42,F43)", "F")
+        for c in actual_weighted_cols
+    ))
+
+    # Use canonical order for standard codes; append any extra codes at end
+    canonical_codes = _WIDE_FORMAT_NACE_CODES
+    extra_codes = [c for c in actual_nace_codes if c not in canonical_codes]
+    ordered_codes = canonical_codes + sorted(extra_codes)
+
+    ordered_weighted = [_nace_column_name(c) for c in ordered_codes]
+    ordered_unweighted = [_unweighted_column_name(c) for c in ordered_codes]
+
+    # Ensure all expected NACE columns exist (fill missing with NaN)
+    for col_name in ordered_weighted:
         if col_name not in wide.columns:
             wide[col_name] = float("nan")
     if unweighted_df is not None:
-        for col_name in ORDERED_UNWEIGHTED_COLUMNS:
+        for col_name in ordered_unweighted:
             if col_name not in wide.columns:
                 wide[col_name] = float("nan")
 
     # -- Step 4: Calculate Total Values ------------------------------------
-    nace_cols_present = [c for c in ORDERED_NACE_VALUE_COLUMNS if c in wide.columns]
+    nace_cols_present = [c for c in ordered_weighted if c in wide.columns]
     wide[TOTAL_VALUE_COLUMN] = wide[nace_cols_present].sum(axis=1, min_count=1)
 
     if unweighted_df is not None:
-        uw_cols_present = [c for c in ORDERED_UNWEIGHTED_COLUMNS if c in wide.columns]
+        uw_cols_present = [c for c in ordered_unweighted if c in wide.columns]
         wide[TOTAL_UNWEIGHTED_COLUMN] = wide[uw_cols_present].sum(
             axis=1, min_count=1
         )
@@ -191,7 +211,7 @@ def reshape_to_wide(
     # Interleave weighted and unweighted columns per NACE code
     nace_columns_ordered: list[str] = []
     for weighted_col, unweighted_col in zip(
-        ORDERED_NACE_VALUE_COLUMNS, ORDERED_UNWEIGHTED_COLUMNS
+        ordered_weighted, ordered_unweighted
     ):
         nace_columns_ordered.append(weighted_col)
         if unweighted_df is not None:

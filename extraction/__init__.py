@@ -23,6 +23,19 @@ import os
 import pandas as pd
 
 from .employment_by_sex import EmploymentBySexExtractor
+from .employment_by_age_sex import EmploymentByAgeSexExtractor
+from .turnover import TurnoverExtractor
+from .enterprises_by_size import EnterprisesBySizeExtractor
+from .training_participation import TrainingParticipationExtractor
+from .rd_expenditure import RdExpenditureExtractor
+from .hours_worked import HoursWorkedExtractor
+from .fdi_inward import FdiInwardExtractor
+from .investment_per_person import InvestmentPerPersonExtractor
+from .ip_investment import IpInvestmentExtractor
+from .education_level import EducationLevelExtractor
+from .temporary_employment import TemporaryEmploymentExtractor
+from .hazardous_waste import HazardousWasteExtractor
+from .ict_usage import IctUsageExtractor
 from .weights import apply_weights
 from .reshape import reshape_to_wide
 
@@ -36,8 +49,19 @@ from .reshape import reshape_to_wide
 
 EXTRACTORS = {
     "employment_by_sex": EmploymentBySexExtractor,
-    # "turnover":        TurnoverExtractor,
-    # "enterprises":     EnterprisesExtractor,
+    "employment_by_age_sex": EmploymentByAgeSexExtractor,
+    "turnover": TurnoverExtractor,
+    "enterprises_by_size": EnterprisesBySizeExtractor,
+    "training_participation": TrainingParticipationExtractor,
+    "rd_expenditure": RdExpenditureExtractor,
+    "hours_worked": HoursWorkedExtractor,
+    "fdi_inward": FdiInwardExtractor,
+    "investment_per_person": InvestmentPerPersonExtractor,
+    "ip_investment": IpInvestmentExtractor,
+    "education_level": EducationLevelExtractor,
+    "temporary_employment": TemporaryEmploymentExtractor,
+    "hazardous_waste": HazardousWasteExtractor,
+    "ict_usage": IctUsageExtractor,
 }
 
 
