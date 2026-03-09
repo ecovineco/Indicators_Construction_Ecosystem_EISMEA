@@ -68,9 +68,6 @@ class HoursWorkedExtractor(BaseExtractor):
 
         time_col = find_time_col(raw)
 
-        # Filter out aggregate time values (e.g. "TOTAL") — keep only numeric years.
-        raw = raw[raw[time_col].str.match(r"^\d+$")].copy()
-
         out = pd.DataFrame({
             "Country Code": raw["geo"],
             "Country Name": raw["geo"].map(lambda g: geo_labels.get(g, g)),

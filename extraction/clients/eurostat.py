@@ -142,7 +142,16 @@ def _aggregate_f(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def find_time_col(df: pd.DataFrame) -> str:
-    """Find the time dimension column name (varies across datasets)."""
+    """Find the time dimension column name (varies across datasets).
+
+    Prefers an exact match on "time" or "TIME_PERIOD" before falling back
+    to a substring search, so that columns like "worktime" are not matched
+    accidentally.
+    """
+    lower_map = {c.lower(): c for c in df.columns}
+    for exact in ("time", "time_period"):
+        if exact in lower_map:
+            return lower_map[exact]
     for c in df.columns:
         if "time" in c.lower():
             return c

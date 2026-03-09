@@ -3,7 +3,7 @@ Extract: Gross capital formation in intellectual property products.
 
 Dataset: ``nama_10_a64_p5``
 Source:   Eurostat — Gross capital formation by industry and asset type
-Indicator: ``na_item`` = ``P5G`` (Gross capital formation)
+Indicator: ``na_item`` = ``P51G`` (Gross fixed capital formation)
 Asset:   ``asset10`` = ``N117G`` (Intellectual property products, gross)
 Unit:    EUR million at current prices (no conversion needed)
 Weight data type: ``other``
@@ -51,7 +51,7 @@ class IpInvestmentExtractor(BaseExtractor):
         raw, geo_labels = fetch_eurostat(
             dataset_code="nama_10_a64_p5",
             params=[
-                ("na_item", "P5G"),
+                ("na_item", "P51G"),
                 ("asset10", "N117G"),
                 ("unit", "CP_MEUR"),
             ],
