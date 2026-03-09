@@ -1,3 +1,4 @@
+# README IS OUTDATED, WILL BE CHANGED LATER
 # Construction Ecosystem Data Pipeline
 
 Extracts statistical data from multiple sources (Eurostat and future integrations), applies construction-sector weights, and produces clean Excel outputs.
