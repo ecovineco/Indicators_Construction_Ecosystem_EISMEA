@@ -36,6 +36,15 @@ from .education_level import EducationLevelExtractor
 from .temporary_employment import TemporaryEmploymentExtractor
 from .hazardous_waste import HazardousWasteExtractor
 from .ict_usage import IctUsageExtractor
+from .internet_access import InternetAccessExtractor
+from .ai_usage import AiUsageExtractor
+from .data_analytics import DataAnalyticsExtractor
+from .innovation_expenditure import InnovationExpenditureExtractor
+from .innovation_expenditure_pct import InnovationExpenditurePctExtractor
+from .production_index import ProductionIndexExtractor
+from .fats_value_added import FatsValueAddedExtractor
+from .turnover_share_eu import TurnoverShareEuExtractor
+from .turnover_share_gdp import TurnoverShareGdpExtractor
 from .weights import apply_weights
 from .reshape import reshape_to_wide
 
@@ -62,6 +71,15 @@ EXTRACTORS = {
     "temporary_employment": TemporaryEmploymentExtractor,
     "hazardous_waste": HazardousWasteExtractor,
     "ict_usage": IctUsageExtractor,
+    "internet_access": InternetAccessExtractor,
+    "ai_usage": AiUsageExtractor,
+    "data_analytics": DataAnalyticsExtractor,
+    "innovation_expenditure": InnovationExpenditureExtractor,
+    "innovation_expenditure_pct": InnovationExpenditurePctExtractor,
+    "production_index": ProductionIndexExtractor,
+    "fats_value_added": FatsValueAddedExtractor,
+    "turnover_share_eu": TurnoverShareEuExtractor,
+    "turnover_share_gdp": TurnoverShareGdpExtractor,
 }
 
 

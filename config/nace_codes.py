@@ -65,6 +65,21 @@ API_NACE_CODES_RD = [
     "N77", "N78", "N81",
 ]
 
+# Custom NACE codes for fats_activ (Inward FATS).
+# This dataset groups several ecosystem codes:
+#   - C24_C25 (C25 not available individually)
+#   - C31_C32 (C31 not available individually)
+#   - M69-M71 group (M69, M70, M71 not available individually)
+#   - N78-N82 group (N78, N81 not available individually)
+#   - E codes only at section level "E"
+# Only codes available individually are extracted.
+API_NACE_CODES_FATS = [
+    "C28", "C33",
+    "F",
+    "M72",
+    "N77",
+]
+
 # Size class labels for SBS datasets
 SIZE_CLASS_LABELS = {
     "TOTAL": "Total",
@@ -100,4 +115,81 @@ ISCED_LABELS = {
     "ED0-2": "Less than upper secondary",
     "ED3_4": "Upper secondary and post-secondary non-tertiary",
     "ED5-8": "Tertiary",
+}
+
+# Internet access indicator labels for isoc_r_ci_in_en2
+INTERNET_ACCESS_LABELS = {
+    "E_IUSE_GT10": ">10% of employees",
+    "E_IUSE_GT50": ">50% of employees",
+}
+
+# AI technology usage labels for isoc_r_eb_ain2
+AI_USAGE_LABELS = {
+    "E_AI_TX": "Don't use any AI",
+    "E_AI_TANY": "At least 1 AI technology",
+    "E_AI_TGE2": "At least 2 AI technologies",
+    "E_AI_TGE3": "At least 3 AI technologies",
+}
+
+# Country-of-control labels for fats_activ (Inward FATS).
+# Codes correspond to the ``c_ctrl`` dimension.
+COUNTRY_CONTROL_LABELS = {
+    "BE": "Belgium",
+    "BG": "Bulgaria",
+    "CZ": "Czechia",
+    "DK": "Denmark",
+    "DE": "Germany",
+    "EE": "Estonia",
+    "IE": "Ireland",
+    "EL": "Greece",
+    "ES": "Spain",
+    "FR": "France",
+    "HR": "Croatia",
+    "IT": "Italy",
+    "CY": "Cyprus",
+    "LV": "Latvia",
+    "LT": "Lithuania",
+    "LU": "Luxembourg",
+    "HU": "Hungary",
+    "MT": "Malta",
+    "NL": "Netherlands",
+    "AT": "Austria",
+    "PL": "Poland",
+    "PT": "Portugal",
+    "RO": "Romania",
+    "SI": "Slovenia",
+    "SK": "Slovakia",
+    "FI": "Finland",
+    "SE": "Sweden",
+    "INT_EU27_2020": "Intra-EU27",
+    "IS": "Iceland",
+    "LI": "Liechtenstein",
+    "NO": "Norway",
+    "CH": "Switzerland",
+    "UK": "United Kingdom",
+    "TR": "Türkiye",
+    "RU": "Russia",
+    "EXT_EU27_2020": "Extra-EU27",
+    "EXT_EU_NAL": "Extra-EU, not allocated",
+    "CA": "Canada",
+    "US": "United States",
+    "CN_X_HK": "China (excl. Hong Kong)",
+    "HK": "Hong Kong",
+    "JP": "Japan",
+    "IL": "Israel",
+    "AU": "Australia",
+    "NZ": "New Zealand",
+    "DOM": "Domestic",
+    "ESC_UCI": "Equally-shared control",
+    "OFFSHO": "Offshore financial centers",
+    "WORLD": "All countries",
+    "WRL_REST": "Rest of the world",
+}
+
+# Innovation expenditure size class labels for inn_cis13_exp
+INNOVATION_SIZE_CLASS_LABELS = {
+    "TOTAL": "Total",
+    "10-49": "10-49 employees",
+    "50-249": "50-249 employees",
+    "GE250": "250+ employees",
 }

@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:ec.europa.eu)",
+      "Bash(curl -s \"https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/sts_copr_m?format=JSON&lang=EN&geo=BE&s_adj=SCA&nace_r2=F&unit=I21&sinceTimePeriod=2023M01&untilTimePeriod=2023M03\")"
+    ]
+  }
+}
